@@ -11,7 +11,6 @@ BASE_DIR = Path(__file__).resolve().parent / "Datasets_v2"
 INPUT_FILE = BASE_DIR / "ICT Access and Usage by Individuals.xlsx"
 
 OUTPUT_DIR = Path(__file__).resolve().parent / "output_ict_usage"
-OUTPUT_DIR.mkdir(exist_ok=True)
 
 print("BASE_DIR:", BASE_DIR)
 print("INPUT_FILE:", INPUT_FILE)
@@ -19,7 +18,7 @@ print("Exists:", INPUT_FILE.exists())
 
 KEEP_AGGREGATES = False
 # False = keep only country-level rows
-# True  = also keep rows like OECD, EU, Non-OECD economies
+# can change to True, if want to keep rows like OECD, EU, Non-OECD economies etc, but right now we want to focus on country-level data only
 
 # =========================================================
 # HELPERS
@@ -40,14 +39,15 @@ def parse_cell_ref(cell_ref: str):
 
 def load_shared_strings(zip_file):
     shared_strings = []
-    if "xl/sharedStrings.xml" not in zip_file.namelist():
+    if "xl/sharedStrings.xml" not in zip_file.namelist():  #check if sharedStrings.xml exists, if not return empty list
         return shared_strings
 
-    root = ET.fromstring(zip_file.read("xl/sharedStrings.xml"))
+    root = ET.fromstring(zip_file.read("xl/sharedStrings.xml"))  # read and parse sharedStrings.xml to get the list of shared strings used in the workbook
+    # iterates each shared string items
     for si in root.findall("a:si", NS):
         parts = []
         for t in si.iter("{http://schemas.openxmlformats.org/spreadsheetml/2006/main}t"):
-            parts.append(t.text or "")
+            parts.append(t.text or "") # store reconstructed string value for this shared string item, handling both simple and rich text cases
         shared_strings.append("".join(parts))
     return shared_strings
 
