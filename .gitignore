@@ -1,9 +1,7 @@
 Datasets/
 Datasets_v2/
 
-output_ict_usage/
-output_patent/
-output_telecom/
+
 
 __pycache__/
 *.pyc
