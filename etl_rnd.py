@@ -234,6 +234,10 @@ rd_dim_df = sheets[RD_DIMENSION_SHEET_NAME].copy()
 dim_time_df = sheets["Dim_Year"].copy()
 dim_country_df = map_country_names(sheets["Dim_Country"])
 
+dim_time_df["Quarter"] = None
+dim_time_df["YearQuarter"] = dim_time_df["Year"].astype(str)
+dim_time_df = dim_time_df[["Time_Key", "Year", "Quarter", "YearQuarter"]]
+
 # ============================================
 # CHECK WHETHER R&D DIMENSION HAS ONLY ONE KEY
 # ============================================

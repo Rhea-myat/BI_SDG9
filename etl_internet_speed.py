@@ -225,6 +225,10 @@ print("Fact columns:", fact_df.columns.tolist())
 if "REF_AREA" in fact_df.columns:
     fact_df = fact_df.drop(columns=["REF_AREA"])
 
+dim_time["Quarter"] = None
+dim_time["YearQuarter"] = dim_time["Year"].astype(str)
+dim_time = dim_time[["Time_Key", "Year", "Quarter", "YearQuarter"]]
+
 fact_df.to_csv(OUTPUT_DIR / "fact_internetspeed.csv", index=False)
 dim_city.to_csv(OUTPUT_DIR / "dim_city.csv", index=False)
 dim_country.to_csv(OUTPUT_DIR / "dim_country.csv", index=False)
