@@ -337,7 +337,7 @@ dim_time.to_csv(OUTPUT_DIR / "dim_time.csv", index=False)
 dim_networktype.to_csv(OUTPUT_DIR / "dim_networktype.csv", index=False)
 dim_networkaccess.to_csv(OUTPUT_DIR / "dim_networkaccesstype.csv", index=False)
 dim_measuretype.to_csv(OUTPUT_DIR / "dim_measuretype.csv", index=False)
-dim_unitstat.to_csv(OUTPUT_DIR / "dim_unit_or_statistic.csv", index=False)
+#dim_unitstat.to_csv(OUTPUT_DIR / "dim_unit.csv", index=False)
 fact_telecom.to_csv(OUTPUT_DIR / "fact_telecom.csv", index=False)
 
 print("\nFiles saved to:", OUTPUT_DIR)
