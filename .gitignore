@@ -1,9 +1,8 @@
 Datasets/
 Datasets_v2/
 
-
 *.xlsx
-*.Others/
+Others/
 __pycache__/
 *.pyc
 .DS_Store
