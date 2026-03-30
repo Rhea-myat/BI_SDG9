@@ -169,7 +169,7 @@ for row in rows[6:]:
             "Year": year,
             "Quarter": None,                 # yearly data
             "YearQuarter": str(year),        # consistent with shared Dim_Time
-            "MeasureType": "Individuals using the Internet - last 3 months",
+            "ICT_Type": "Individuals using the Internet - last 3 months",
             "ICTUsagePercentage": value,
             "UnitOfMeasure": "Percentage of population",
             "Breakdown": breakdown_text
@@ -208,14 +208,14 @@ dim_time = (
 dim_time["Time_Key"] = range(1, len(dim_time) + 1)
 dim_time = dim_time[["Time_Key", "Year", "Quarter", "YearQuarter"]]
 
-# ---- Dim_MeasureType ----
-dim_measuretype = (
-    df_long[["MeasureType"]]
+# ---- Dim_ICT_Usage ----
+dim_ict_usage = (
+    df_long[["ICT_Type"]]
     .drop_duplicates()
     .reset_index(drop=True)
 )
-dim_measuretype["Measure_Key"] = range(1, len(dim_measuretype) + 1)
-dim_measuretype = dim_measuretype[["Measure_Key", "MeasureType"]]
+dim_ict_usage["ICT_Key"] = range(1, len(dim_ict_usage) + 1)
+dim_ict_usage = dim_ict_usage[["ICT_Key", "ICT_Type"]]
 
 # =========================================================
 # FACT TABLE
@@ -224,14 +224,14 @@ fact_ictusage = (
     df_long
     .merge(dim_country, on="Country_Name", how="left")
     .merge(dim_time, on=["Year", "Quarter", "YearQuarter"], how="left")
-    .merge(dim_measuretype, on="MeasureType", how="left")
+    .merge(dim_ict_usage, on="ICT_Type", how="left")
     .copy()
 )
 
 fact_ictusage["ICT_ID"] = range(1, len(fact_ictusage) + 1)
 
 fact_ictusage = fact_ictusage[
-    ["ICT_ID", "Country_Key", "Time_Key", "Measure_Key", "ICTUsagePercentage"]
+    ["ICT_ID", "Country_Key", "Time_Key", "ICT_Key", "ICTUsagePercentage"]
 ].sort_values(["Country_Key", "Time_Key"]).reset_index(drop=True)
 
 # =========================================================
@@ -240,10 +240,10 @@ fact_ictusage = fact_ictusage[
 print("\n--- Data Quality Checks ---")
 print("Null Country_Key:", fact_ictusage["Country_Key"].isna().sum())
 print("Null Time_Key:", fact_ictusage["Time_Key"].isna().sum())
-print("Null Measure_Key:", fact_ictusage["Measure_Key"].isna().sum())
+print("Null ICT_Key:", fact_ictusage["ICT_Key"].isna().sum())
 print(
     "Duplicate business rows:",
-    fact_ictusage.duplicated(subset=["Country_Key", "Time_Key", "Measure_Key"]).sum()
+    fact_ictusage.duplicated(subset=["Country_Key", "Time_Key", "ICT_Key"]).sum()
 )
 
 # =========================================================
@@ -251,7 +251,7 @@ print(
 # =========================================================
 dim_country.to_csv(OUTPUT_DIR / "dim_country.csv", index=False)
 dim_time.to_csv(OUTPUT_DIR / "dim_time.csv", index=False)
-dim_measuretype.to_csv(OUTPUT_DIR / "dim_measuretype.csv", index=False)
+dim_ict_usage.to_csv(OUTPUT_DIR / "dim_ict_usage.csv", index=False)
 fact_ictusage.to_csv(OUTPUT_DIR / "fact_ictusage.csv", index=False)
 df_long.to_csv(OUTPUT_DIR / "stg_ict_usage_long.csv", index=False)
 

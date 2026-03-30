@@ -148,7 +148,7 @@ for col_idx, year_val in year_row.items():
     column_meta[col_idx] = {
         "Year": int(year_clean),
         "PatentAuthority": clean_text(authority_row.get(col_idx)),
-        "PatentMeasure": clean_text(measure_row.get(col_idx)),
+        "Patent_Type": clean_text(measure_row.get(col_idx)),
         "AgentRole": clean_text(agent_row.get(col_idx))
     }
 
@@ -189,7 +189,7 @@ for row in rows[8:]:  # Excel row 9 onward
             "Quarter": None,
             "YearQuarter": str(meta["Year"]),
             "PatentAuthority": meta["PatentAuthority"],
-            "PatentMeasure": meta["PatentMeasure"],
+            "Patent_Type": meta["Patent_Type"],
             "AgentRole": meta["AgentRole"],
             "PatentCount": value
         })
@@ -199,6 +199,8 @@ df_long = pd.DataFrame(records)
 print("\nLong-format preview:")
 print(df_long.head())
 print("\nShape:", df_long.shape)
+print("\nRows with PatentCount = 0:")
+print(df_long[df_long["PatentCount"] == 0])
 
 if df_long.empty:
     raise ValueError("No rows were parsed into df_long.")
@@ -233,14 +235,14 @@ dim_patentauthority = (
 dim_patentauthority["PatentAuthorityKey"] = range(1, len(dim_patentauthority) + 1)
 dim_patentauthority = dim_patentauthority[["PatentAuthorityKey", "PatentAuthority"]]
 
-dim_patentmeasure = (
-    df_long[["PatentMeasure"]]
+dim_patent = (
+    df_long[["Patent_Type"]]
     .drop_duplicates()
-    .sort_values("PatentMeasure")
+    .sort_values("Patent_Type")
     .reset_index(drop=True)
 )
-dim_patentmeasure["PatentMeasureKey"] = range(1, len(dim_patentmeasure) + 1)
-dim_patentmeasure = dim_patentmeasure[["PatentMeasureKey", "PatentMeasure"]]
+dim_patent["Patent_Key"] = range(1, len(dim_patent) + 1)
+dim_patent = dim_patent[["Patent_Key", "Patent_Type"]]
 
 dim_agentrole = (
     df_long[["AgentRole"]]
@@ -259,7 +261,7 @@ fact_patent = (
     .merge(dim_country, on="Country_Name", how="left")
     .merge(dim_time, on=["Year", "Quarter", "YearQuarter"], how="left")
     .merge(dim_patentauthority, on="PatentAuthority", how="left")
-    .merge(dim_patentmeasure, on="PatentMeasure", how="left")
+    .merge(dim_patent, on="Patent_Type", how="left")
     .merge(dim_agentrole, on="AgentRole", how="left")
     .copy()
 )
@@ -271,11 +273,11 @@ fact_patent = fact_patent[[
     "Country_Key",
     "Time_Key",
     "PatentAuthorityKey",
-    "PatentMeasureKey",
+    "Patent_Key",
     "AgentRoleKey",
     "PatentCount"
 ]].sort_values(
-    ["Country_Key", "Time_Key", "PatentAuthorityKey", "PatentMeasureKey", "AgentRoleKey"]
+    ["Country_Key", "Time_Key", "PatentAuthorityKey", "Patent_Key", "AgentRoleKey"]
 ).reset_index(drop=True)
 
 # =========================================================
@@ -285,7 +287,7 @@ print("\n--- Data Quality Checks ---")
 print("Null Country_Key:", fact_patent["Country_Key"].isna().sum())
 print("Null Time_Key:", fact_patent["Time_Key"].isna().sum())
 print("Null PatentAuthorityKey:", fact_patent["PatentAuthorityKey"].isna().sum())
-print("Null PatentMeasureKey:", fact_patent["PatentMeasureKey"].isna().sum())
+print("Null Patent_Key:", fact_patent["Patent_Key"].isna().sum())
 print("Null AgentRoleKey:", fact_patent["AgentRoleKey"].isna().sum())
 
 dup_count = fact_patent.duplicated(
@@ -293,7 +295,7 @@ dup_count = fact_patent.duplicated(
         "Country_Key",
         "Time_Key",
         "PatentAuthorityKey",
-        "PatentMeasureKey",
+        "Patent_Key",
         "AgentRoleKey"
     ]
 ).sum()
@@ -306,7 +308,7 @@ df_long.to_csv(OUTPUT_DIR / "stg_patent_long.csv", index=False)
 dim_country.to_csv(OUTPUT_DIR / "dim_country.csv", index=False)
 dim_time.to_csv(OUTPUT_DIR / "dim_time.csv", index=False)
 dim_patentauthority.to_csv(OUTPUT_DIR / "dim_patentauthority.csv", index=False)
-dim_patentmeasure.to_csv(OUTPUT_DIR / "dim_patentmeasure.csv", index=False)
+dim_patent.to_csv(OUTPUT_DIR / "dim_patent.csv", index=False)
 dim_agentrole.to_csv(OUTPUT_DIR / "dim_agentrole.csv", index=False)
 fact_patent.to_csv(OUTPUT_DIR / "fact_patent.csv", index=False)
 

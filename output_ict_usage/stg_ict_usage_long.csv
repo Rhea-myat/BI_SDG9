@@ -1,4 +1,4 @@
-Country_Name,Year,Quarter,YearQuarter,MeasureType,ICTUsagePercentage,UnitOfMeasure,Breakdown
+Country_Name,Year,Quarter,YearQuarter,ICT_Type,ICTUsagePercentage,UnitOfMeasure,Breakdown
 Austria,2018,,2018,Individuals using the Internet - last 3 months,87.4791,Percentage of population,Breakdown: From 16 to 74 years
 Austria,2019,,2019,Individuals using the Internet - last 3 months,87.7522,Percentage of population,Breakdown: From 16 to 74 years
 Austria,2020,,2020,Individuals using the Internet - last 3 months,87.5294,Percentage of population,Breakdown: From 16 to 74 years

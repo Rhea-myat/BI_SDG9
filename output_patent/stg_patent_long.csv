@@ -1,4 +1,4 @@
-Country_Name,Year,Quarter,YearQuarter,PatentAuthority,PatentMeasure,AgentRole,PatentCount
+Country_Name,Year,Quarter,YearQuarter,PatentAuthority,Patent_Type,AgentRole,PatentCount
 Australia,2018,,2018,European Patent Office,Patent applications,Inventor,988.8630981445312
 Australia,2018,,2018,European Patent Office,Patent applications,Applicant,883.0
 Australia,2018,,2018,European Patent Office,Patent grants,Inventor,178.085693359375

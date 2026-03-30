@@ -191,7 +191,7 @@ for i, row in enumerate(rows[4:], start=5):  # start at Excel row 5
 
         records.append({
             "Country_Name": country,
-            "MeasureType": measure_type,
+            "Type": measure_type,
             "NetworkAccessType": current_network_access,
             "NetworkType": current_network_type,
             "YearQuarter": yq,
@@ -211,14 +211,14 @@ if df_long.empty:
 # =========================================================
 # CLEAN TEXT FIELDS
 # =========================================================
-for col in ["Country_Name", "MeasureType", "NetworkAccessType", "NetworkType", "Unit"]:
+for col in ["Country_Name", "Type", "NetworkAccessType", "NetworkType", "Unit"]:
     df_long[col] = df_long[col].apply(clean_text)
 
 df_long["Year"] = df_long["YearQuarter"].str.split("-").str[0].astype(int)
 df_long["Quarter"] = df_long["YearQuarter"].str.split("-").str[1]
 
-print("\nUnique MeasureType values:")
-print(sorted(df_long["MeasureType"].dropna().unique()))
+print("\nUnique Type values:")
+print(sorted(df_long["Type"].dropna().unique()))
 
 print("\nUnique Unit values:")
 print(sorted(df_long["Unit"].dropna().unique()))
@@ -264,14 +264,14 @@ dim_networkaccess = (
 dim_networkaccess["NetworkAccessKey"] = range(1, len(dim_networkaccess) + 1)
 dim_networkaccess = dim_networkaccess[["NetworkAccessKey", "NetworkAccessType"]]
 
-dim_measuretype = (
-    df_long[["MeasureType"]]
+dim_telecom = (
+    df_long[["Type"]]
     .drop_duplicates()
-    .sort_values("MeasureType")
+    .sort_values("Type")
     .reset_index(drop=True)
 )
-dim_measuretype["Measure_Key"] = range(1, len(dim_measuretype) + 1)
-dim_measuretype = dim_measuretype[["Measure_Key", "MeasureType"]]
+dim_telecom["Telecom_Key"] = range(1, len(dim_telecom) + 1)
+dim_telecom = dim_telecom[["Telecom_Key", "Type"]]
 
 dim_unit = (
     df_long[["Unit"]]
@@ -291,7 +291,7 @@ fact_telecom = (
     .merge(dim_time, on=["Year", "Quarter", "YearQuarter"], how="left")
     .merge(dim_networktype, on="NetworkType", how="left")
     .merge(dim_networkaccess, on="NetworkAccessType", how="left")
-    .merge(dim_measuretype, on="MeasureType", how="left")
+    .merge(dim_telecom, on="Type", how="left")
     .merge(dim_unit, on="Unit", how="left")
     .copy()
 )
@@ -304,11 +304,11 @@ fact_telecom = fact_telecom[[
     "Time_Key",
     "NetworkTypeKey",
     "NetworkAccessKey",
-    "Measure_Key",
+    "Telecom_Key",
     "Unit_Key",
     "MeasureValue"
 ]].sort_values(
-    ["Country_Key", "Time_Key", "NetworkTypeKey", "NetworkAccessKey", "Measure_Key"]
+    ["Country_Key", "Time_Key", "NetworkTypeKey", "NetworkAccessKey", "Telecom_Key"]
 ).reset_index(drop=True)
 
 # =========================================================
@@ -319,15 +319,15 @@ print("Null Country_Key:", fact_telecom["Country_Key"].isna().sum())
 print("Null Time_Key:", fact_telecom["Time_Key"].isna().sum())
 print("Null NetworkTypeKey:", fact_telecom["NetworkTypeKey"].isna().sum())
 print("Null NetworkAccessKey:", fact_telecom["NetworkAccessKey"].isna().sum())
-print("Null Measure_Key:", fact_telecom["Measure_Key"].isna().sum())
+print("Null Telecom_Key:", fact_telecom["Telecom_Key"].isna().sum())
 
 dup_count = fact_telecom.duplicated(
-    subset=["Country_Key", "Time_Key", "NetworkTypeKey", "NetworkAccessKey", "Measure_Key"]
+    subset=["Country_Key", "Time_Key", "NetworkTypeKey", "NetworkAccessKey", "Telecom_Key"]
 ).sum()
 print("Duplicate business rows:", dup_count)
 
-print("\nMeasure types loaded:")
-print(dim_measuretype)
+print("\nType values loaded:")
+print(dim_telecom)
 
 # =========================================================
 # LOAD
@@ -337,7 +337,7 @@ dim_country.to_csv(OUTPUT_DIR / "dim_country.csv", index=False)
 dim_time.to_csv(OUTPUT_DIR / "dim_time.csv", index=False)
 dim_networktype.to_csv(OUTPUT_DIR / "dim_networktype.csv", index=False)
 dim_networkaccess.to_csv(OUTPUT_DIR / "dim_networkaccesstype.csv", index=False)
-dim_measuretype.to_csv(OUTPUT_DIR / "dim_measuretype.csv", index=False)
+dim_telecom.to_csv(OUTPUT_DIR / "dim_telecom.csv", index=False)
 dim_unit.to_csv(OUTPUT_DIR / "dim_unit.csv", index=False)
 fact_telecom.to_csv(OUTPUT_DIR / "fact_telecom.csv", index=False)
 

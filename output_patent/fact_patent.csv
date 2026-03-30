@@ -1,4 +1,4 @@
-Patent_ID,Country_Key,Time_Key,PatentAuthorityKey,PatentMeasureKey,AgentRoleKey,PatentCount
+Patent_ID,Country_Key,Time_Key,PatentAuthorityKey,Patent_Key,AgentRoleKey,PatentCount
 2082,1,1,1,1,1,0.0
 2081,1,1,1,1,2,1.416700005531311
 2085,1,1,1,2,1,0.0
