@@ -1,4 +1,4 @@
-Country_Name,MeasureType,NetworkAccessType,NetworkType,YearQuarter,MeasureValue,UnitOrStatistic,Year,Quarter
+Country_Name,MeasureType,NetworkAccessType,NetworkType,YearQuarter,MeasureValue,Unit,Year,Quarter
 Australia,Subscriptions,Total,Fixed broadband,2018-Q2,8158000.0,Subscriptions,2018,Q2
 Australia,Subscriptions,Total,Fixed broadband,2018-Q4,8423457.0,Subscriptions,2018,Q4
 Australia,Subscriptions,Total,Fixed broadband,2019-Q2,8702310.0,Subscriptions,2019,Q2

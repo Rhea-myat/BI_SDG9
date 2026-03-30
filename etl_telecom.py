@@ -174,10 +174,10 @@ for i, row in enumerate(rows[4:], start=5):  # start at Excel row 5
 
     # Country data row
     country = col2
-    unit_or_stat = col3  # often "Subscriptions", maybe "Data usage", etc.
+    unit = col3  # "Subscriptions", "Data usage"
 
     # If measure metadata is missing, fall back to column C
-    measure_type = current_measure if current_measure else unit_or_stat
+    measure_type = current_measure if current_measure else unit
 
     for col_idx, yq in time_map.items():
         raw_value = row.get(col_idx)
@@ -196,7 +196,7 @@ for i, row in enumerate(rows[4:], start=5):  # start at Excel row 5
             "NetworkType": current_network_type,
             "YearQuarter": yq,
             "MeasureValue": value,
-            "UnitOrStatistic": unit_or_stat
+            "Unit": unit
         })
 
 df_long = pd.DataFrame(records)
@@ -209,9 +209,9 @@ if df_long.empty:
     raise ValueError("No fact rows parsed. Check metadata block structure.")
 
 # =========================================================
-# CLEAN / ENRICH
+# CLEAN TEXT FIELDS
 # =========================================================
-for col in ["Country_Name", "MeasureType", "NetworkAccessType", "NetworkType", "UnitOrStatistic"]:
+for col in ["Country_Name", "MeasureType", "NetworkAccessType", "NetworkType", "Unit"]:
     df_long[col] = df_long[col].apply(clean_text)
 
 df_long["Year"] = df_long["YearQuarter"].str.split("-").str[0].astype(int)
@@ -220,8 +220,8 @@ df_long["Quarter"] = df_long["YearQuarter"].str.split("-").str[1]
 print("\nUnique MeasureType values:")
 print(sorted(df_long["MeasureType"].dropna().unique()))
 
-print("\nUnique UnitOrStatistic values:")
-print(sorted(df_long["UnitOrStatistic"].dropna().unique()))
+print("\nUnique Unit values:")
+print(sorted(df_long["Unit"].dropna().unique()))
 
 # =========================================================
 # DIMENSIONS
@@ -273,15 +273,14 @@ dim_measuretype = (
 dim_measuretype["Measure_Key"] = range(1, len(dim_measuretype) + 1)
 dim_measuretype = dim_measuretype[["Measure_Key", "MeasureType"]]
 
-# Optional: keep this only if useful in your schema/report
-dim_unitstat = (
-    df_long[["UnitOrStatistic"]]
+dim_unit = (
+    df_long[["Unit"]]
     .drop_duplicates()
-    .sort_values("UnitOrStatistic")
+    .sort_values("Unit")
     .reset_index(drop=True)
 )
-dim_unitstat["UnitStat_Key"] = range(1, len(dim_unitstat) + 1)
-dim_unitstat = dim_unitstat[["UnitStat_Key", "UnitOrStatistic"]]
+dim_unit["Unit_Key"] = range(1, len(dim_unit) + 1)
+dim_unit = dim_unit[["Unit_Key", "Unit"]]
 
 # =========================================================
 # FACT
@@ -293,6 +292,7 @@ fact_telecom = (
     .merge(dim_networktype, on="NetworkType", how="left")
     .merge(dim_networkaccess, on="NetworkAccessType", how="left")
     .merge(dim_measuretype, on="MeasureType", how="left")
+    .merge(dim_unit, on="Unit", how="left")
     .copy()
 )
 
@@ -305,6 +305,7 @@ fact_telecom = fact_telecom[[
     "NetworkTypeKey",
     "NetworkAccessKey",
     "Measure_Key",
+    "Unit_Key",
     "MeasureValue"
 ]].sort_values(
     ["Country_Key", "Time_Key", "NetworkTypeKey", "NetworkAccessKey", "Measure_Key"]
@@ -337,7 +338,7 @@ dim_time.to_csv(OUTPUT_DIR / "dim_time.csv", index=False)
 dim_networktype.to_csv(OUTPUT_DIR / "dim_networktype.csv", index=False)
 dim_networkaccess.to_csv(OUTPUT_DIR / "dim_networkaccesstype.csv", index=False)
 dim_measuretype.to_csv(OUTPUT_DIR / "dim_measuretype.csv", index=False)
-#dim_unitstat.to_csv(OUTPUT_DIR / "dim_unit.csv", index=False)
+dim_unit.to_csv(OUTPUT_DIR / "dim_unit.csv", index=False)
 fact_telecom.to_csv(OUTPUT_DIR / "fact_telecom.csv", index=False)
 
 print("\nFiles saved to:", OUTPUT_DIR)
