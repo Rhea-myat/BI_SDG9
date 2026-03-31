@@ -24,11 +24,18 @@ def load_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def normalize_country_name(name):
+    if pd.isna(name):
+        return name
+    return str(name).replace("·", "").strip()
+
+
 def build_shared_dim_country(country_frames: list[pd.DataFrame]) -> pd.DataFrame:
     all_countries = pd.concat(
         [frame[["Country_Name"]] for frame in country_frames],
         ignore_index=True,
     ).dropna()
+    all_countries["Country_Name"] = all_countries["Country_Name"].map(normalize_country_name)
 
     dim_country = (
         all_countries.drop_duplicates()
@@ -64,8 +71,11 @@ def remap_fact_keys(
     shared_dim_country: pd.DataFrame,
     shared_dim_time: pd.DataFrame,
 ) -> pd.DataFrame:
+    old_dim_country = old_dim_country.copy()
     old_dim_time = old_dim_time.copy()
     shared_dim_time = shared_dim_time.copy()
+
+    old_dim_country["Country_Name"] = old_dim_country["Country_Name"].map(normalize_country_name)
 
     old_dim_time["Quarter"] = old_dim_time["Quarter"].where(old_dim_time["Quarter"].notna(), None)
     old_dim_time["Quarter"] = old_dim_time["Quarter"].astype(object)

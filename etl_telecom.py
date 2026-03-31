@@ -104,6 +104,7 @@ def clean_text(x):
     if x is None:
         return None
     x = str(x).strip()
+    x = x.replace("·", "")
     x = re.sub(r"\s+", " ", x)
     return x
 
