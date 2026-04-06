@@ -1,11 +1,11 @@
 Datasets/
-
-
+ETL/
+*.zip
 *.xlsx
 Others/
 __pycache__/
 *.pyc
 .DS_Store
-
+*.pbix
 *.pptx
 *.docx
