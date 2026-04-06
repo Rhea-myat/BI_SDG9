@@ -1,7 +1,6 @@
 Datasets/
 ETL/
 *.zip
-*.xlsx
 Others/
 __pycache__/
 *.pyc
